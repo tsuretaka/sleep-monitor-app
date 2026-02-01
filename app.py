@@ -282,14 +282,26 @@ elif authentication_status:
                     except ValueError: pass
 
         # 5. Input Forms
+        # Helper for time selection (15 min intervals) to avoid mobile keyboard popup
+        time_options = [f"{h:02d}:{m:02d}" for h in range(24) for m in (0, 15, 30, 45)]
+        
         col1, col2 = st.columns(2)
         
         with col1:
             st.subheader("睡眠区間の追加")
             with st.form("add_segment_form", clear_on_submit=True):
                 s_type = st.selectbox("種類", ["In-bed (布団に入っている)", "Deep Sleep (ぐっすり)", "Doze (うとうと)", "Awake (眠れない)"])
-                t_start = st.time_input("開始時刻", value=datetime.strptime("23:00", "%H:%M").time())
-                t_end = st.time_input("終了時刻", value=datetime.strptime("07:00", "%H:%M").time())
+                
+                # Use selectbox for time to improve mobile UX
+                def get_time_index(t_str):
+                    try: return time_options.index(t_str)
+                    except ValueError: return 0
+                
+                t_start_str = st.selectbox("開始時刻", time_options, index=get_time_index("23:00"))
+                t_end_str = st.selectbox("終了時刻", time_options, index=get_time_index("07:00"))
+
+                t_start = datetime.strptime(t_start_str, "%H:%M").time()
+                t_end = datetime.strptime(t_end_str, "%H:%M").time()
                 
                 if st.form_submit_button("区間を追加"):
                     st.session_state.segments.append({
@@ -303,7 +315,9 @@ elif authentication_status:
             st.subheader("イベントの追加")
             with st.form("add_event_form", clear_on_submit=True):
                 e_type = st.selectbox("イベント種類", ["sleep_med (睡眠薬)", "toilet (トイレ)", "other_med (その他薬)"])
-                e_time = st.time_input("発生時刻", value=datetime.strptime("22:00", "%H:%M").time())
+                
+                e_time_str = st.selectbox("発生時刻", time_options, index=get_time_index("22:00"))
+                e_time = datetime.strptime(e_time_str, "%H:%M").time()
                 
                 if st.form_submit_button("イベントを追加"):
                     st.session_state.events.append({
