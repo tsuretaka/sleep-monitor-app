@@ -22,7 +22,23 @@ try:
 except FileNotFoundError:
     # Try fetching from secrets if file not found (Cloud Deployment)
     if "credentials" in st.secrets:
-        config = st.secrets
+        # Convert secrets to a mutable dictionary, as streamlit-authenticator tries to modify it
+        config = dict(st.secrets)
+        # Deep copy credentials to ensure mutability at nested levels if needed,
+        # but configured dict usually suffices for top-level keys.
+        # However, secrets object is recursive. Let's do a trick to ensure it's a dict.
+        import json
+        # Simple way to detach from AttrDict is via json dump/load or explicit dict conversion
+        # Use simple dict conversion for top level, but for credentials we might need more.
+        # Actually, stauth just needs to be able to set credentials['usernames']...
+        # Let's try deep copy or recursive dict conversion.
+        
+        def to_dict(obj):
+            if isinstance(obj, dict) or hasattr(obj, 'items'): # Check if it behaves like a dict
+                return {k: to_dict(v) for k, v in obj.items()}
+            return obj
+            
+        config = to_dict(st.secrets)
     else:
         st.error(f"{auth_file} not found and no secrets configuration detected.")
         st.stop()
