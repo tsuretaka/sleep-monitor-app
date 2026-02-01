@@ -62,8 +62,20 @@ import os
 # ... (imports remain)
 
 # Database Setup
-# Database URL from environment variable (for Cloud) or local SQLite
-database_url = os.getenv('DATABASE_URL', 'sqlite:///sleep_monitor.db')
+# Database Setup
+# Try to look for Streamlit secrets first (for Cloud or local secrets.toml)
+database_url = None
+try:
+    import streamlit as st
+    # Check if secret exists
+    if hasattr(st, "secrets") and "DATABASE_URL" in st.secrets:
+        database_url = st.secrets["DATABASE_URL"]
+except (ImportError, FileNotFoundError, Exception):
+    pass
+
+# Fallback to Environment Variable or SQLite
+if not database_url:
+    database_url = os.getenv('DATABASE_URL', 'sqlite:///sleep_monitor.db')
 
 # Fix for some PaaS (e.g. Heroku, Render) using postgres:// instead of postgresql://
 if database_url and database_url.startswith("postgres://"):
