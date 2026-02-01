@@ -1,0 +1,11 @@
+streamlit
+streamlit-authenticator
+pandas
+reportlab
+Pillow
+bcrypt
+pyyaml
+SQLAlchemy
+pydantic
+psycopg2-binary
+streamlit-calendar
