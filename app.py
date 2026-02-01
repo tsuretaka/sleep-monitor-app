@@ -297,8 +297,8 @@ elif authentication_status:
                     try: return time_options.index(t_str)
                     except ValueError: return 0
                 
-                t_start_str = st.selectbox("開始時刻", time_options, index=get_time_index("23:00"))
-                t_end_str = st.selectbox("終了時刻", time_options, index=get_time_index("07:00"))
+                t_start_str = st.select_slider("開始時刻", options=time_options, value="23:00")
+                t_end_str = st.select_slider("終了時刻", options=time_options, value="07:00")
 
                 t_start = datetime.strptime(t_start_str, "%H:%M").time()
                 t_end = datetime.strptime(t_end_str, "%H:%M").time()
@@ -316,7 +316,7 @@ elif authentication_status:
             with st.form("add_event_form", clear_on_submit=True):
                 e_type = st.selectbox("イベント種類", ["sleep_med (睡眠薬)", "toilet (トイレ)", "other_med (その他薬)"])
                 
-                e_time_str = st.selectbox("発生時刻", time_options, index=get_time_index("22:00"))
+                e_time_str = st.select_slider("発生時刻", options=time_options, value="22:00")
                 e_time = datetime.strptime(e_time_str, "%H:%M").time()
                 
                 if st.form_submit_button("イベントを追加"):
